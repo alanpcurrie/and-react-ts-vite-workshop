@@ -1,8 +1,8 @@
-export const addItemToArray = (callback: (arg0: any[]) => void) => (arr: any[]) => (item: any) => {
-  callback([...arr, ...item]);
+export const addItemToArray = <T>(callback: (arg0: T[]) => void) => (arr: T[]) => (item: T) => {
+  callback([...arr, item]);
 };
 
-export const removeItemFromArray = (callback: (arg0: any) => void) => (arr: string | any[]) => (index: number) => {
+export const removeItemFromArray = <T>(callback: (arg0: T[]) => void) => (arr: T[]) => (index: number) => {
   callback([...arr.slice(0, index), ...arr.slice(index + 1)]);
 };
 
