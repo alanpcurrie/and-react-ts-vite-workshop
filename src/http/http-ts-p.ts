@@ -1,5 +1,6 @@
 import { useEffect, useRef, useReducer } from "react";
 import type { State, Action } from 'types/types'
+import { match } from 'ts-pattern';
 
 export const useFetch = (url: string) => {
 
@@ -11,28 +12,30 @@ export const useFetch = (url: string) => {
 
   const cache = useRef<Record<string, string>>({});
 
-  const reducerMap = {
-    FETCHING: <T>(state: State<T>, action: Action<T>) => ({
-      ...state,
-      status: "fetching",
-      data: action.payload
-    }),
-    FETCHED: <T>(state: State<T>, action: Action<T>): State<T> => ({
-      ...state,
-      status: "fetched",
-      data: action.payload
-    }),
-    FETCH_ERROR: <T>(state: State<T>, action: Action<T>): State<T> => ({
-      ...state,
-      status: "error",
-      error: action.payload as string
-    })
+  const reducer = <T>(state: State<T>, action: Action<T>): State<T> => {
+    const matchAction = match(action.type);
+
+    return matchAction
+      .with("FETCHING", () => ({
+        ...state,
+        status: "fetching",
+        data: action.payload
+      }))
+      .with("FETCHED", () => ({
+        ...state,
+        status: "fetched",
+        data: action.payload
+      }))
+      .with("FETCH_ERROR", () => ({
+        ...state,
+        status: "error",
+        error: action.payload as string
+      }))
+      .exhaustive()
   };
 
-  const [state, dispatch] = useReducer(
-    <T>(state: State<T>, action: Action<T>): State<T> => reducerMap[action.type](state, action),
-    initialState
-  );
+  const [state, dispatch] = useReducer(reducer, initialState);
+
 
   useEffect(() => {
     let cancelRequest = false;
@@ -56,6 +59,9 @@ export const useFetch = (url: string) => {
             dispatch({ type: "FETCH_ERROR", payload: error.message });
           }
           return;
+        }
+        finally {
+          console.log('some cleanup');
         }
       }
     };

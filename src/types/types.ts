@@ -34,11 +34,13 @@ export type FetchError<T> = {
 
 export type Action<T> = Fetching<T> | Fetched<T> | FetchError<T>;
 
+
 export type State<T> = {
     status: string;
     error: null | string;
     data: T;
 }
 
+export type ReducerMap<T> = Record<Action<T>["type"], (state: State<T>, action: Action<T>) => State<T>>;
 
-export type ReducerMap<T> = Record<Action<T>["type"], (state: State<T>, action: Action<T>) => void>;
+export type Result<T, E extends Error> = { ok: true, value: T } | { ok: false, error: E };
